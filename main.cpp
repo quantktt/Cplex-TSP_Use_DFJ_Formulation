@@ -2,7 +2,7 @@
 #include <ilcplex/ilocplex.h>
 #include <fstream>
 #include <vector>
-#include <math.h>
+#include <cmath>
 using namespace std;
 ILOSTLBEGIN;
 
@@ -27,6 +27,26 @@ vector<vector<int>> findSubTours(vector<int> nextNode) {
 
 int main()
 {
+    freopen("data.txt", "rt", stdin);
+    freopen("solution.txt", "wt", stdout);
+    ios::sync_with_stdio(false);
+    cin.tie(0), cout.tie(0);
+
+    int n;
+    cin>>n;
+
+    vector<double> xPos(n), yPos(n);
+    for(int i=0; i<n; i++) {
+        cin>>xPos[i]>>yPos[i];
+    }
+
+    vector<vector<double>> cost(n, vector<double>(n));
+    for(int i=0; i<n; i++) {
+        for(int j=0; j<n; j++) {
+            cost[i][j] = sqrt(pow(xPos[j]-xPos[i], 2) + pow(yPos[j]-yPos[i], 2));
+        }
+    }
+
 
     IloEnv env;
     try{
@@ -79,7 +99,7 @@ int main()
             expr.clear();
         }
 
-        // Third constraint, we make sure that no subset of n points forms a subcycle
+        // Third constraint, we make sure that no subset of n points forms a subtour
         /* But there are too many subsets (~2^n) so we will add the constraints one by one. This is like
         making the model tight gradually, until it is tight enough to give feasible results then stop */
 
@@ -116,6 +136,8 @@ int main()
             }
         }
         expr.end();
+
+        cplex.exportModel("TSPmodel_2.lp");
 
 
         /*-----PRINT SOLUTIONS-----------*/
