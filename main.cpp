@@ -27,8 +27,8 @@ vector<vector<int>> findSubTours(vector<int> nextNode) {
 
 int main()
 {
-    freopen("data.txt", "rt", stdin);
-    freopen("solution.txt", "wt", stdout);
+    freopen("/home/quan/Desktop/Ai_Do?/ORProject/TestDataFile/TSP/ulysses22.tsp", "rt", stdin);
+    freopen("solution_for_ulysses22_DFJ.txt", "wt", stdout);
     ios::sync_with_stdio(false);
     cin.tie(0), cout.tie(0);
 
@@ -37,7 +37,9 @@ int main()
 
     vector<double> xPos(n), yPos(n);
     for(int i=0; i<n; i++) {
-        cin>>xPos[i]>>yPos[i];
+        int index;
+        cin>> index;
+        cin>> xPos[i]>> yPos[i];
     }
 
     vector<vector<double>> cost(n, vector<double>(n));
@@ -137,7 +139,7 @@ int main()
         }
         expr.end();
 
-        cplex.exportModel("TSPmodel_2.lp");
+        cplex.exportModel("TSP-DFJ_ulysses22.lp");
 
 
         /*-----PRINT SOLUTIONS-----------*/
