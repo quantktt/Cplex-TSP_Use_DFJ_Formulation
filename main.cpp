@@ -3,7 +3,9 @@
 #include <fstream>
 #include <vector>
 #include <cmath>
+#include <cstring>
 using namespace std;
+stringstream name;
 ILOSTLBEGIN;
 
 vector<vector<int>> findSubTours(vector<int> nextNode) {
@@ -27,8 +29,8 @@ vector<vector<int>> findSubTours(vector<int> nextNode) {
 
 int main()
 {
-    freopen("/home/quan/Desktop/Ai_Do?/ORProject/TestDataFile/TSP/ulysses16.tsp", "rt", stdin);
-    freopen("solution_for_ulysses16_DFJ.txt", "wt", stdout);
+    freopen("/home/quan/Desktop/Ai_Do?/ORProject/DataFile/TSP/ulysses22.tsp", "rt", stdin);
+    freopen("solution_for_ulysses22_DFJ.txt", "wt", stdout);
     ios::sync_with_stdio(false);
     cin.tie(0), cout.tie(0);
 
@@ -63,7 +65,9 @@ int main()
         for(int i=0; i<n; i++) {
             x[i] = IloNumVarArray(env, n);
             for(int j=0; j<n; j++) {
-                x[i][j] = IloNumVar(env, 0, 1, ILOBOOL);
+                name<< "x_"<< i<< "."<< j;
+                x[i][j] = IloNumVar(env, 0, 1, ILOBOOL, name.str().c_str());
+                name.str("");
             }
         }
 
@@ -82,6 +86,9 @@ int main()
 
 
         /*------CONSTRAINTS----------*/
+        IloRangeArray inbound_cons(env, n);
+        IloRangeArray outbound_cons(env, n);
+
         IloExpr expr(env);
         for(int i=0; i<n; i++) {
             for(int j=0; j<n; j++) {
@@ -89,7 +96,9 @@ int main()
                     expr += x[i][j];
                 }
             }
-            model.add(expr == 1);
+            name<< "inbound_"<< i;
+            inbound_cons[i] = IloRange(env, 1, expr, 1, name.str().c_str());
+            name.str("");
             expr.clear();
         }
 
@@ -99,7 +108,9 @@ int main()
                     expr += x[i][j];
                 }
             }
-            model.add(expr == 1);
+            name<< "outbound_"<< j;
+            outbound_cons[j] = IloRange(env, 1, expr, 1, name.str().c_str());
+            name.str("");
             expr.clear();
         }
 
@@ -108,7 +119,8 @@ int main()
         making the model tight gradually, until it is tight enough to give feasible results then stop */
 
         IloCplex cplex(model);
-        while(1) {
+        int countCons=1;
+        while(countCons++) {
             if(!cplex.solve()) {
                 cout<< "Failed to optimize model with this data file!";
                 break;
@@ -135,13 +147,16 @@ int main()
                         }
                     }
                 }
-                model.add(expr <= numOfNodes - 1);
+                name<< "DFJ_"<< countCons;
+                IloRange DFJ(env, -IloInfinity, expr, numOfNodes - 1, name.str().c_str());
+                model.add(DFJ);
+                name.str("");
                 expr.clear();
             }
         }
         expr.end();
 
-        cplex.exportModel("TSP-DFJ_ulysses16.lp");
+        cplex.exportModel("TSP-DFJ_ulysses22.lp");
 
 
         /*-----PRINT SOLUTIONS-----------*/
